@@ -8,15 +8,15 @@ addpath('../AggScreening/')
 addpath('../AggScreening/strainsList/')
 
 %% Set parameters
-extractStamp = '20201123_114236'; % '20201123_114236' for non-filtered feats; '20201123_123144' for filtered feats (~97.6+/-0.25% normal n_skeleton); '20201123_174404' for first half of 30 min
+extractStamp = '20201202_171608'; % '20201202_171608' for standard feats; '20201202_182346' for filtered feats; '20201202_184448' for first half of 30 min
 n_nonFeatVar = 23; % the first n columns of the feature table that do not contain features. =23
 classVar = {'strain_name','devicePitch','wormPrepType'}; 
 
-strains2keep = {'N2','CB4856','MY23','VX34','QX1410','JU1373','NIC58'}; % Use all strains if cell left empty. {'all'} or {'divergent'} or {'controls'} or {'strain1', 'strain2'}. Cell array containing strains to keep for analysis. 
+strains2keep = {'N2','CB4856','MY23','VX34','QX1410','JU1373','NIC58'}; 
 strains2drop = {}; % {'VX34','NIC58'} Cell array containing strains to drop from analysis.
 feats2keep = {'Tierpsy_256'}; % Use all features if left empty. {'Tierpsy_256'} or {'feat1','feat2'}. Cell array containing features to use for analysis. 
 feats2drop = {}; % {'path'};
-device2use = 'all'; % 'all', 300, 384, 480, 420
+device2use = 'all'; % 'all', 300 (even), 350 (even), 384 (variable), 480 (variable), 420 (280/200)
 device2drop = '';
 
 %% Load and process features table and extract features matrix
@@ -33,12 +33,13 @@ for varCtr = 1:numel(classVar)
     featureTable.(var) = classLabels.(var);
 end
 % % filter for device type
+deviceLogInd = true(size(featureTable,1),1);
 if isscalar(device2use)
-    deviceLogInd = featureTable.devicePitch == device2use;
+    deviceLogInd = deviceLogInd & featureTable.devicePitch == device2use;
     featureTable = featureTable(deviceLogInd,:);
 end
 if isscalar(device2drop)
-    deviceLogInd = featureTable.devicePitch ~= device2use;
+    deviceLogInd = deviceLogInd & featureTable.devicePitch ~= device2drop;
     featureTable = featureTable(deviceLogInd,:);
 end 
 % extract featureMat
@@ -82,19 +83,21 @@ title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' fe
 deviceFig = figure; hold on
 %
 even300LogInd = featureTable.devicePitch == 300;
+even350LogInd = featureTable.devicePitch == 350;
 var384LogInd = featureTable.devicePitch == 384;
 var480LogInd = featureTable.devicePitch == 480;
 var420LogInd = featureTable.devicePitch == 420;
 %
-plot(score(even300LogInd,1),score(even300LogInd,2),'r.')
+plot(score(even300LogInd,1),score(even300LogInd,2),'rx')
+plot(score(even350LogInd,1),score(even350LogInd,2),'kx')
 plot(score(var384LogInd,1),score(var384LogInd,2),'b.')
 plot(score(var480LogInd,1),score(var480LogInd,2),'g.')
 plot(score(var420LogInd,1),score(var420LogInd,2),'m.')
 %
 xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
 ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
-legend({'even300','variable384','variable480','variable420'})
-title(['PCA plot with ' num2str(n_strains) ' and ' num2str(n_feats) ' features'])
+legend({'even300','even350','variable384','variable480','variable420'})
+title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
 
 %% Plot first two PCs and colour by worm prep type
 %
@@ -109,7 +112,7 @@ plot(score(bleachLogInd,1),score(bleachLogInd,2),'o')
 xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
 ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
 legend({'doublePick','bleach'})
-title(['PCA plot with ' num2str(n_strains) ' and ' num2str(n_feats) ' features'])
+title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
 
 %% 3D plot of the first three PCs and colour by strain
 %
@@ -133,22 +136,23 @@ title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' fe
 
 %% 3D plot of the first three PCs and colour by device type
 figure; 
-scatter3(score(even300LogInd,1),score(even300LogInd,2),score(even300LogInd),'r.')
+scatter3(score(even300LogInd,1),score(even300LogInd,2),score(even300LogInd,3),'rx')
 hold on
+scatter3(score(even350LogInd,1),score(even350LogInd,2),score(even350LogInd,3),'kx')
 scatter3(score(var384LogInd,1),score(var384LogInd,2),score(var384LogInd,3),'b.')
 scatter3(score(var480LogInd,1),score(var480LogInd,2),score(var480LogInd,3),'g.')
 scatter3(score(var420LogInd,1),score(var420LogInd,2),score(var420LogInd,3),'m.')
 xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
 ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
 zlabel(['PC3 (' num2str(round(explained(3))) ')%'])
-legend({'even300','variable384','variable480','variable420'})
+legend({'even300','even350','variable384','variable480','variable420'})
 title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
 
 %% 3D plot of the first three PCs and colour by pick type
 figure; 
-scatter3(score(pickLogInd,1),score(pickLogInd,2),score(pickLogInd),'r.')
+scatter3(score(pickLogInd,1),score(pickLogInd,2),score(pickLogInd),'x')
 hold on
-scatter3(score(bleachLogInd,1),score(bleachLogInd,2),score(bleachLogInd,3),'b.')
+scatter3(score(bleachLogInd,1),score(bleachLogInd,2),score(bleachLogInd,3),'o')
 xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
 ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
 zlabel(['PC3 (' num2str(round(explained(3))) ')%'])
@@ -175,7 +179,7 @@ xlabel('Number of PCs'); ylabel('Additional variance explained (%)');
 % featureTable.Properties.VariableNames(featInd)'
 
 %% Clustergram
-rowLabels = strcat(featureTable.strain_name,'\_',num2str(featureTable.devicePitch));
-colLabels = featureTable.Properties.VariableNames(1:end-numel(classVar));
-cgObj = clustergram(featureMat,'RowLabels',rowLabels,'ColumnLabels',colLabels,...
-    'Colormap',redbluecmap,'ShowDendrogram','on','OptimalLeafOrder',true)
+% rowLabels = strcat(featureTable.strain_name,'\_',num2str(featureTable.devicePitch));
+% colLabels = featureTable.Properties.VariableNames(1:end-numel(classVar));
+% cgObj = clustergram(featureMat,'RowLabels',rowLabels,'ColumnLabels',colLabels,...
+%     'Colormap',redbluecmap,'ShowDendrogram','on','OptimalLeafOrder',true)

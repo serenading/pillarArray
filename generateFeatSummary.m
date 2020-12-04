@@ -9,7 +9,7 @@ close all
 %% Import features data and combine with metadata
 
 % set which feature extraction timestamp to use
-extractStamp = '20201123_174404'; % '20201123_114236' for non-filtered feats; '20201123_123144' for filtered feats; '20201123_174404' for first half of 30 min
+extractStamp = '20201202_184448'; % '20201202_171608' for standard feats; '20201202_182346' for filtered feats; '20201202_184448' for first half of 30 min
 
 % load features matrix, correspondong filenames, and metadata
 tierpsyFeatureTable = readtable(['/Users/sding/OneDrive - Imperial College London/pillarArray/Results/features_summary_tierpsy_plate_' extractStamp '.csv'],'Delimiter',',');%,'preserveVariableNames',true);
@@ -33,7 +33,7 @@ combinedTierpsyTable.filename = strrep(fileNamesTierpsy,'_featuresN','.hdf5');
 featureTable = outerjoin(metadataTable,combinedTierpsyTable,'MergeKeys',true);
 
 % get row logical index for valid files
-rowLogInd = strcmp(featureTable.is_good,'True');
+rowLogInd = strcmp(featureTable.is_good,'True') & featureTable.is_bad == 0;
 
 % trim featureTable down to those with valid files
 featureTable = featureTable(rowLogInd,:);
