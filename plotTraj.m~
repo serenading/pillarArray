@@ -1,6 +1,7 @@
 %% Script plots trajectories for visualisation from various pillar array devices.
 % Note: Tierpsy (python) and MATLAB read images differently so transposing
 % is required for alignment. i.e. plot(y,x) instead of plot(x,y);
+% imshow(img)' instead of imshow(img).
 
 % Author: @serenading. Dec 2020
 
@@ -12,13 +13,13 @@ close all
 %% Set parameters
 metadataPath = '/Users/sding/OneDrive - Imperial College London/pillarArray/AuxiliaryFiles/metadata.csv';
 firstFrameDir = '/Volumes/diskAshurDT/pillarArray/AuxiliaryFiles/pillarContourImages';
-device2use = 480; % Variable spacing devices have diameters of 384, 480, 420. Even spacing devices have diameters of 300 and 350.
+device2use = 300; % variable spacing devices have diameters of 384, 480, 420. Even spacing devices 
 frameRate = 25;
 pixelsize = 10; % each pixel is 10 microns
 timeWindow = [0 5]; % time window to plot (in minutes)
 strains = {'N2','CB4856','MY23','VX34','QX1410','JU1373','NIC58'};
 plotFirstFrame = true; % true to plot first full frame image data before adding trajectories on top. Useful for script development to ensure orientation etc.
-separatePlots = true; % true to do a separate plot per experimental replicate, or false to get one giant figure with all replicates
+separatePlots = false; % true to do a separate plot per experimental replicate, or false to get one giant figure with all replicates
 onFoodFilter = true; % true to use food contour coordinates to filter out off food trajectories. Also limits display to food area only
 plotDensity = false; % true to plot trajectory density (3D), false to plot trajectory (2D)
 
@@ -36,7 +37,7 @@ if ~separatePlots
 end
 
 %% Go through each recording and load data
-for fileCtr = 1:5%numel(fileInd)
+for fileCtr = 1:numel(fileInd)
     fileIdx = fileInd(fileCtr);
     % Get skeletons filename
     filename = [metadata.dirName{fileIdx}, '/run' num2str(metadata.runNumber(fileIdx)),'_' metadata.strain_name{fileIdx},'/', metadata.basename{fileIdx}];
@@ -44,8 +45,8 @@ for fileCtr = 1:5%numel(fileInd)
     % Load tracking data
     trajData = h5read(filename,'/trajectories_data');
     foodContour = h5read(filename,'/food_cnt_coord');
-    % Load first full image
     if plotFirstFrame
+        % Load first full image
         fullImgPath = strrep([firstFrameDir,'/', num2str(metadata.date(fileIdx)),'/', metadata.basename{fileIdx}],'.hdf5','.jpg');
         fullImg = imread(fullImgPath);
     end
@@ -63,7 +64,7 @@ for fileCtr = 1:5%numel(fileInd)
         onFoodLogInd = true(size(trajData.coord_x));
     end
     % Orient for variable spacing devices so that smaller pillars are always on the right side (as viewed in Tierpsy Tracker)
-    if strcmp(metadata.smallerPillarSide{fileIdx},'L') % This is manually added to metadata for variable spacing devices
+    if strcmp(metadata.smallerPillarSide{fileIdx},'L')
         trajData.coord_x = 2048-trajData.coord_x; % camera resolution is 2048x2048 pixels
         foodContour(1,:) = 2048-foodContour(1,:);
         if plotFirstFrame

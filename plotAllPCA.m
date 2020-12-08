@@ -12,11 +12,11 @@ extractStamp = '20201202_171608'; % '20201202_171608' for standard feats; '20201
 n_nonFeatVar = 23; % the first n columns of the feature table that do not contain features. =23
 classVar = {'strain_name','devicePitch','wormPrepType'}; 
 
-strains2keep = {'N2','CB4856','MY23','VX34','QX1410','JU1373','NIC58'}; 
+strains2keep = {'N2','CB4856','MY23','QX1410','VX34','NIC58','JU1373'}; 
 strains2drop = {}; % {'VX34','NIC58'} Cell array containing strains to drop from analysis.
 feats2keep = {'Tierpsy_256'}; % Use all features if left empty. {'Tierpsy_256'} or {'feat1','feat2'}. Cell array containing features to use for analysis. 
 feats2drop = {}; % {'path'};
-device2use = 'all'; % 'all', 300 (even), 350 (even), 384 (variable), 480 (variable), 420 (280/200)
+device2use = 420; % 'all', 300 (even), 350 (even), 384 (variable), 480 (variable), 420 (280/200)
 device2drop = '';
 
 %% Load and process features table and extract features matrix
@@ -54,125 +54,134 @@ n_feats = size(featureMat,2);
 [pc, score, ~, ~, explained] = pca(featureMat);
 
 %% Plot first two PCs and colour by strain
-%
-strainFig = figure; hold on
+
 %
 N2LogInd = strcmp(featureTable.strain_name,'N2');
 CB4856LogInd = strcmp(featureTable.strain_name,'CB4856');
 MY23LogInd = strcmp(featureTable.strain_name,'MY23');
-VX34LogInd = strcmp(featureTable.strain_name,'VX34');
 QX1410LogInd = strcmp(featureTable.strain_name,'QX1410');
-JU1373LogInd = strcmp(featureTable.strain_name,'JU1373');
+VX34LogInd = strcmp(featureTable.strain_name,'VX34');
 NIC58LogInd = strcmp(featureTable.strain_name,'NIC58');
-%
-plot(score(N2LogInd,1),score(N2LogInd,2),'bx')
-plot(score(CB4856LogInd,1),score(CB4856LogInd,2),'b*')
-plot(score(MY23LogInd,1),score(MY23LogInd,2),'bo')
-plot(score(VX34LogInd,1),score(VX34LogInd,2),'m*')
-plot(score(QX1410LogInd,1),score(QX1410LogInd,2),'mo')
-plot(score(JU1373LogInd,1),score(JU1373LogInd,2),'g*')
-plot(score(NIC58LogInd,1),score(NIC58LogInd,2),'go')
-%
-xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
-ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
-legend({'N2','CB4856','MY23','VX34','QX1410','JU1373','NIC58'})
-title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
+JU1373LogInd = strcmp(featureTable.strain_name,'JU1373');
 
-%% Plot first two PCs and colour by device type
-%
-deviceFig = figure; hold on
-%
-even300LogInd = featureTable.devicePitch == 300;
-even350LogInd = featureTable.devicePitch == 350;
-var384LogInd = featureTable.devicePitch == 384;
-var480LogInd = featureTable.devicePitch == 480;
-var420LogInd = featureTable.devicePitch == 420;
-%
-plot(score(even300LogInd,1),score(even300LogInd,2),'rx')
-plot(score(even350LogInd,1),score(even350LogInd,2),'kx')
-plot(score(var384LogInd,1),score(var384LogInd,2),'b.')
-plot(score(var480LogInd,1),score(var480LogInd,2),'g.')
-plot(score(var420LogInd,1),score(var420LogInd,2),'m.')
-%
-xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
-ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
-legend({'even300','even350','variable384','variable480','variable420'})
-title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
-
-%% Plot first two PCs and colour by worm prep type
-%
-prepFig = figure; hold on
-%
-pickLogInd = strcmp(featureTable.wormPrepType,'doublePick');
-bleachLogInd = strcmp(featureTable.wormPrepType,'bleach');
-%
-plot(score(pickLogInd,1),score(pickLogInd,2),'x')
-plot(score(bleachLogInd,1),score(bleachLogInd,2),'o')
-%
-xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
-ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
-legend({'doublePick','bleach'})
-title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
+% %
+% strainFig = figure; hold on
+% %
+% plot(score(N2LogInd,1),score(N2LogInd,2),'b*')
+% plot(score(CB4856LogInd,1),score(CB4856LogInd,2),'bo')
+% plot(score(MY23LogInd,1),score(MY23LogInd,2),'b.')
+% plot(score(QX1410LogInd,1),score(QX1410LogInd,2),'m*')
+% plot(score(VX34LogInd,1),score(VX34LogInd,2),'mo')
+% plot(score(NIC58LogInd,1),score(NIC58LogInd,2),'g*')
+% plot(score(JU1373LogInd,1),score(JU1373LogInd,2),'go')
+% 
+% %
+% xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
+% ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
+% legend({'N2','CB4856','MY23','QX1410','VX34','NIC58','JU1373'})
+% title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
+% 
+% %% Plot first two PCs and colour by device type
+% %
+% deviceFig = figure; hold on
+% %
+% even300LogInd = featureTable.devicePitch == 300;
+% even350LogInd = featureTable.devicePitch == 350;
+% var384LogInd = featureTable.devicePitch == 384;
+% var480LogInd = featureTable.devicePitch == 480;
+% var420LogInd = featureTable.devicePitch == 420;
+% %
+% plot(score(even300LogInd,1),score(even300LogInd,2),'rx')
+% plot(score(even350LogInd,1),score(even350LogInd,2),'kx')
+% plot(score(var384LogInd,1),score(var384LogInd,2),'b.')
+% plot(score(var480LogInd,1),score(var480LogInd,2),'g.')
+% plot(score(var420LogInd,1),score(var420LogInd,2),'m.')
+% %
+% xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
+% ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
+% legend({'even300','even350','variable384','variable480','variable420'})
+% title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
+% 
+% %% Plot first two PCs and colour by worm prep type
+% %
+% prepFig = figure; hold on
+% %
+% pickLogInd = strcmp(featureTable.wormPrepType,'doublePick');
+% bleachLogInd = strcmp(featureTable.wormPrepType,'bleach');
+% %
+% plot(score(pickLogInd,1),score(pickLogInd,2),'x')
+% plot(score(bleachLogInd,1),score(bleachLogInd,2),'o')
+% %
+% xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
+% ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
+% legend({'doublePick','bleach'})
+% title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
 
 %% 3D plot of the first three PCs and colour by strain
 %
 figure;
 %
-scatter3(score(N2LogInd,1),score(N2LogInd,2),score(N2LogInd,3),'bx')
+scatter3(score(N2LogInd,1),score(N2LogInd,2),score(N2LogInd,3),'b*','LineWidth',2)
 hold on
-scatter3(score(CB4856LogInd,1),score(CB4856LogInd,2),score(CB4856LogInd,3),'b*')
-scatter3(score(MY23LogInd,1),score(MY23LogInd,2),score(MY23LogInd,3),'bo')
-scatter3(score(VX34LogInd,1),score(VX34LogInd,2),score(VX34LogInd,3),'m*')
-scatter3(score(QX1410LogInd,1),score(QX1410LogInd,2),score(QX1410LogInd,3),'mo')
-scatter3(score(JU1373LogInd,1),score(JU1373LogInd,2),score(JU1373LogInd,3),'g*')
-scatter3(score(NIC58LogInd,1),score(NIC58LogInd,2),score(NIC58LogInd,3),'go')
+scatter3(score(CB4856LogInd,1),score(CB4856LogInd,2),score(CB4856LogInd,3),'bo','LineWidth',2)
+scatter3(score(MY23LogInd,1),score(MY23LogInd,2),score(MY23LogInd,3),'b.','LineWidth',2)
+scatter3(score(QX1410LogInd,1),score(QX1410LogInd,2),score(QX1410LogInd,3),'m*','LineWidth',2)
+scatter3(score(VX34LogInd,1),score(VX34LogInd,2),score(VX34LogInd,3),'mo','LineWidth',2)
+scatter3(score(NIC58LogInd,1),score(NIC58LogInd,2),score(NIC58LogInd,3),'g*','LineWidth',2)
+scatter3(score(JU1373LogInd,1),score(JU1373LogInd,2),score(JU1373LogInd,3),'go','LineWidth',2)
+
 %
 xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
 ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
 zlabel(['PC3 (' num2str(round(explained(3))) ')%'])
 %
-legend({'N2','CB4856','MY23','VX34','QX1410','JU1373','NIC58'})
+legend({'N2','CB4856','MY23','QX1410','VX34','NIC58','JU1373'})
 title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
+set(gca,'fontsize',15)
 
-%% 3D plot of the first three PCs and colour by device type
-figure; 
-scatter3(score(even300LogInd,1),score(even300LogInd,2),score(even300LogInd,3),'rx')
-hold on
-scatter3(score(even350LogInd,1),score(even350LogInd,2),score(even350LogInd,3),'kx')
-scatter3(score(var384LogInd,1),score(var384LogInd,2),score(var384LogInd,3),'b.')
-scatter3(score(var480LogInd,1),score(var480LogInd,2),score(var480LogInd,3),'g.')
-scatter3(score(var420LogInd,1),score(var420LogInd,2),score(var420LogInd,3),'m.')
-xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
-ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
-zlabel(['PC3 (' num2str(round(explained(3))) ')%'])
-legend({'even300','even350','variable384','variable480','variable420'})
-title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
-
-%% 3D plot of the first three PCs and colour by pick type
-figure; 
-scatter3(score(pickLogInd,1),score(pickLogInd,2),score(pickLogInd),'x')
-hold on
-scatter3(score(bleachLogInd,1),score(bleachLogInd,2),score(bleachLogInd,3),'o')
-xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
-ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
-zlabel(['PC3 (' num2str(round(explained(3))) ')%'])
-legend({'doublePick','bleach'})
-title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
+% %% 3D plot of the first three PCs and colour by device type
+% figure; 
+% scatter3(score(even300LogInd,1),score(even300LogInd,2),score(even300LogInd,3),'rx')
+% hold on
+% scatter3(score(even350LogInd,1),score(even350LogInd,2),score(even350LogInd,3),'kx')
+% scatter3(score(var384LogInd,1),score(var384LogInd,2),score(var384LogInd,3),'b.')
+% scatter3(score(var480LogInd,1),score(var480LogInd,2),score(var480LogInd,3),'g.')
+% scatter3(score(var420LogInd,1),score(var420LogInd,2),score(var420LogInd,3),'m.')
+% xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
+% ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
+% zlabel(['PC3 (' num2str(round(explained(3))) ')%'])
+% legend({'even300','even350','variable384','variable480','variable420'})
+% title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
+% 
+% %% 3D plot of the first three PCs and colour by pick type
+% figure; 
+% scatter3(score(pickLogInd,1),score(pickLogInd,2),score(pickLogInd,3),'x')
+% hold on
+% scatter3(score(bleachLogInd,1),score(bleachLogInd,2),score(bleachLogInd,3),'o')
+% xlabel(['PC1 (' num2str(round(explained(1))) ')%'])
+% ylabel(['PC2 (' num2str(round(explained(2))) ')%'])
+% zlabel(['PC3 (' num2str(round(explained(3))) ')%'])
+% legend({'doublePick','bleach'})
+% title(['PCA plot with ' num2str(n_strains) ' strains and ' num2str(n_feats) ' features'])
 
 %% Plot variance explained as a function of number of PCs
 %
 figure; hold on
 %
 subplot(1,2,1)
-plot(cumsum(explained),'o'); 
+plot(cumsum(explained),'o','LineWidth',2); 
 ylim([0 100]); xlabel('Number of PCs'); ylabel('Variance explained (%)');
 if strcmp(feats2keep,'Tierpsy_256')
     xlim([0 80])
 end
+%
+set(gca,'fontsize',15)
 % 
 subplot(1,2,2)
-plot(explained,'o')
+plot(explained,'o','LineWidth',2)
 xlabel('Number of PCs'); ylabel('Additional variance explained (%)');
+%
+set(gca,'fontsize',15)
 
 %% see what's inside the first PC
 % [feat,featInd] = sort(pc(:,1)); % PC1 
